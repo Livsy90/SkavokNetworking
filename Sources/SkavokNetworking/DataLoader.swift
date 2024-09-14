@@ -16,7 +16,7 @@ final class DataLoader: NSObject, URLSessionDataDelegate, URLSessionDownloadDele
     private var userDownloadDelegate: URLSessionDownloadDelegate?
 
     private static let downloadDirectoryURL: URL = {
-        let url = FileManager.default.temporaryDirectory.appendingPathComponent("com.cattogram/Downloads/")
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("com.skavokNetworking/Downloads/")
         try? FileManager.default.removeItem(at: url)
         return url
     }()
