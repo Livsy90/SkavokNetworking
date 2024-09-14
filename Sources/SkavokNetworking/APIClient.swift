@@ -17,7 +17,7 @@ public actor APIClient: ApiClientProtocol {
         /// A base URL. For example, `"https://api.github.com"`.
         public var baseURL: URL?
         /// Headers, contained information, mandatory for correct request (ex.: api keys)
-        public var mandatoryHaaders: [String: String] = [:]
+        public var mandatoryHeaders: [String: String] = [:]
         /// The client delegate. The client holds a strong reference to it.
         public var delegate: APIClientDelegate?
         /// By default, `URLSessionConfiguration.default`.
