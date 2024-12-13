@@ -1,5 +1,7 @@
 import Foundation
 
+public typealias EncodableModel = Encodable & Sendable
+
 /// An HTTP network request.
 public struct Request<Response>: @unchecked Sendable {
     /// HTTP method, e.g. "GET".
@@ -9,18 +11,18 @@ public struct Request<Response>: @unchecked Sendable {
     /// Request query items.
     public var query: [(String, String?)]?
     /// Request body.
-    public var body: Encodable?
+    public var body: EncodableModel?
     /// Request headers to be added to the request.
     public var headers: [String: String]?
     /// ID provided by the user. Not used by the API client.
     public var id: String?
 
-    /// Initialiazes the request with the given parameters.
+    /// Initializes the request with the given parameters.
     public init(
         url: URL,
         method: HTTPMethod = .get,
         query: [(String, String?)]? = nil,
-        body: Encodable? = nil,
+        body: EncodableModel? = nil,
         headers: [String: String]? = nil,
         id: String? = nil
     ) {
@@ -37,7 +39,7 @@ public struct Request<Response>: @unchecked Sendable {
         path: String,
         method: HTTPMethod = .get,
         query: [(String, String?)]? = nil,
-        body: Encodable? = nil,
+        body: EncodableModel? = nil,
         headers: [String: String]? = nil,
         id: String? = nil
     ) {
@@ -71,7 +73,7 @@ extension Request where Response == Void {
         url: URL,
         method: HTTPMethod = .get,
         query: [(String, String?)]? = nil,
-        body: Encodable? = nil,
+        body: EncodableModel? = nil,
         headers: [String: String]? = nil,
         id: String? = nil
     ) {
@@ -88,7 +90,7 @@ extension Request where Response == Void {
         path: String,
         method: HTTPMethod = .get,
         query: [(String, String?)]? = nil,
-        body: Encodable? = nil,
+        body: EncodableModel? = nil,
         headers: [String: String]? = nil,
         id: String? = nil
     ) {
@@ -101,7 +103,7 @@ extension Request where Response == Void {
     }
 }
 
-public struct HTTPMethod: RawRepresentable, Hashable, ExpressibleByStringLiteral {
+public struct HTTPMethod: RawRepresentable, Hashable, ExpressibleByStringLiteral, Sendable {
     public let rawValue: String
 
     public init(rawValue: String) {

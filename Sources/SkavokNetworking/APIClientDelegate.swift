@@ -1,7 +1,7 @@
 import Foundation
 
 /// Allows you to modify ``APIClient`` behavior.
-public protocol APIClientDelegate {
+public protocol APIClientDelegate: Sendable {
     /// Allows you to modify the request right before it is sent.
     ///
     /// Gets called right before sending the request. If the retries are enabled,

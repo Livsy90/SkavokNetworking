@@ -25,7 +25,9 @@ final class DataLoader: NSObject, URLSessionDataDelegate, URLSessionDownloadDele
         try await withTaskCancellationHandler(operation: {
             try await withUnsafeThrowingContinuation { continuation in
                 let handler = DataTaskHandler(delegate: delegate)
-                handler.completion = continuation.resume(with:)
+                handler.completion = { @Sendable result in
+                    continuation.resume(with: result)
+                }
                 self.handlers[task] = handler
 
                 task.resume()
@@ -39,7 +41,9 @@ final class DataLoader: NSObject, URLSessionDataDelegate, URLSessionDownloadDele
         try await withTaskCancellationHandler(operation: {
             try await withUnsafeThrowingContinuation { continuation in
                 let handler = DownloadTaskHandler(delegate: delegate)
-                handler.completion = continuation.resume(with:)
+                handler.completion = { @Sendable result in
+                    continuation.resume(with: result)
+                }
                 self.handlers[task] = handler
 
                 task.resume()
@@ -53,7 +57,9 @@ final class DataLoader: NSObject, URLSessionDataDelegate, URLSessionDownloadDele
         try await withTaskCancellationHandler(operation: {
             try await withUnsafeThrowingContinuation { continuation in
                 let handler = DataTaskHandler(delegate: delegate)
-                handler.completion = continuation.resume(with:)
+                handler.completion = { @Sendable result in
+                    continuation.resume(with: result)
+                }
                 self.handlers[task] = handler
 
                 task.resume()
@@ -112,9 +118,27 @@ final class DataLoader: NSObject, URLSessionDataDelegate, URLSessionDownloadDele
         userTaskDelegate?.urlSession?(session, task: task, didFinishCollecting: metrics)
     }
 
-    func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse, newRequest request: URLRequest, completionHandler: @escaping (URLRequest?) -> Void) {
-        handlers[task]?.delegate?.urlSession?(session, task: task, willPerformHTTPRedirection: response, newRequest: request, completionHandler: completionHandler) ??
-        userTaskDelegate?.urlSession?(session, task: task, willPerformHTTPRedirection: response, newRequest: request, completionHandler: completionHandler) ??
+    func urlSession(
+        _ session: URLSession,
+        task: URLSessionTask,
+        willPerformHTTPRedirection response: HTTPURLResponse,
+        newRequest request: URLRequest,
+        completionHandler: @escaping @Sendable (URLRequest?) -> Void
+    ) {
+        handlers[task]?.delegate?.urlSession?(
+            session,
+            task: task,
+            willPerformHTTPRedirection: response,
+            newRequest: request,
+            completionHandler: completionHandler
+        ) ??
+        userTaskDelegate?.urlSession?(
+            session,
+            task: task,
+            willPerformHTTPRedirection: response,
+            newRequest: request,
+            completionHandler: completionHandler
+        ) ??
         completionHandler(request)
     }
 
@@ -123,22 +147,62 @@ final class DataLoader: NSObject, URLSessionDataDelegate, URLSessionDownloadDele
         userTaskDelegate?.urlSession?(session, taskIsWaitingForConnectivity: task)
     }
 
-    func urlSession(_ session: URLSession, task: URLSessionTask, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-        handlers[task]?.delegate?.urlSession?(session, task: task, didReceive: challenge, completionHandler: completionHandler) ??
-        userTaskDelegate?.urlSession?(session, task: task, didReceive: challenge, completionHandler: completionHandler) ??
+    func urlSession(
+        _ session: URLSession,
+        task: URLSessionTask,
+        didReceive challenge: URLAuthenticationChallenge,
+        completionHandler: @escaping @Sendable (URLSession.AuthChallengeDisposition, URLCredential?) -> Void
+    ) {
+        handlers[task]?.delegate?.urlSession?(
+            session,
+            task: task,
+            didReceive: challenge,
+            completionHandler: completionHandler
+        ) ??
+        userTaskDelegate?.urlSession?(
+            session,
+            task: task,
+            didReceive: challenge,
+            completionHandler: completionHandler
+        ) ??
         completionHandler(.performDefaultHandling, nil)
     }
 
-    func urlSession(_ session: URLSession, task: URLSessionTask, willBeginDelayedRequest request: URLRequest, completionHandler: @escaping (URLSession.DelayedRequestDisposition, URLRequest?) -> Void) {
-        handlers[task]?.delegate?.urlSession?(session, task: task, willBeginDelayedRequest: request, completionHandler: completionHandler) ??
-        userTaskDelegate?.urlSession?(session, task: task, willBeginDelayedRequest: request, completionHandler: completionHandler) ??
+    func urlSession(_ session: URLSession, task: URLSessionTask, willBeginDelayedRequest request: URLRequest, completionHandler: @escaping @Sendable (URLSession.DelayedRequestDisposition, URLRequest?) -> Void) {
+        handlers[task]?.delegate?.urlSession?(
+            session,
+            task: task,
+            willBeginDelayedRequest: request,
+            completionHandler: completionHandler
+        ) ??
+        userTaskDelegate?.urlSession?(
+            session,
+            task: task,
+            willBeginDelayedRequest: request,
+            completionHandler: completionHandler
+        ) ??
         completionHandler(.continueLoading, nil)
     }
 
     // MARK: - URLSessionDataDelegate
-    func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive response: URLResponse, completionHandler: @escaping (URLSession.ResponseDisposition) -> Void) {
-        (handlers[dataTask] as? DataTaskHandler)?.dataDelegate?.urlSession?(session, dataTask: dataTask, didReceive: response, completionHandler: completionHandler) ??
-        userDataDelegate?.urlSession?(session, dataTask: dataTask, didReceive: response, completionHandler: completionHandler) ??
+    func urlSession(
+        _ session: URLSession,
+        dataTask: URLSessionDataTask,
+        didReceive response: URLResponse,
+        completionHandler: @escaping @Sendable (URLSession.ResponseDisposition) -> Void
+    ) {
+        (handlers[dataTask] as? DataTaskHandler)?.dataDelegate?.urlSession?(
+            session,
+            dataTask: dataTask,
+            didReceive: response,
+            completionHandler: completionHandler
+        ) ??
+        userDataDelegate?.urlSession?(
+            session,
+            dataTask: dataTask,
+            didReceive: response,
+            completionHandler: completionHandler
+        ) ??
         completionHandler(.allow)
     }
 
@@ -155,9 +219,24 @@ final class DataLoader: NSObject, URLSessionDataDelegate, URLSessionDownloadDele
     }
 
 
-    func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, willCacheResponse proposedResponse: CachedURLResponse, completionHandler: @escaping (CachedURLResponse?) -> Void) {
-        (handlers[dataTask] as? DataTaskHandler)?.dataDelegate?.urlSession?(session, dataTask: dataTask, willCacheResponse: proposedResponse, completionHandler: completionHandler) ??
-        userDataDelegate?.urlSession?(session, dataTask: dataTask, willCacheResponse: proposedResponse, completionHandler: completionHandler) ??
+    func urlSession(
+        _ session: URLSession,
+        dataTask: URLSessionDataTask,
+        willCacheResponse proposedResponse: CachedURLResponse,
+        completionHandler: @escaping @Sendable (CachedURLResponse?) -> Void
+    ) {
+        (handlers[dataTask] as? DataTaskHandler)?.dataDelegate?.urlSession?(
+            session,
+            dataTask: dataTask,
+            willCacheResponse: proposedResponse,
+            completionHandler: completionHandler
+        ) ??
+        userDataDelegate?.urlSession?(
+            session,
+            dataTask: dataTask,
+            willCacheResponse: proposedResponse,
+            completionHandler: completionHandler
+        ) ??
         completionHandler(proposedResponse)
     }
 
@@ -246,7 +325,10 @@ extension OperationQueue {
 
 extension Optional: OptionalDecoding {}
 
-func encode(_ value: Encodable, using encoder: JSONEncoder) async throws -> Data? {
+func encode(
+    _ value: Encodable & Sendable,
+    using encoder: JSONEncoder
+) async throws -> Data? {
     if let data = value as? Data {
         return data
     } else if let string = value as? String {
@@ -258,7 +340,10 @@ func encode(_ value: Encodable, using encoder: JSONEncoder) async throws -> Data
     }
 }
 
-func decode<T: Decodable>(_ data: Data, using decoder: JSONDecoder) async throws -> T {
+func decode<T: Decodable & Sendable>(
+    _ data: Data,
+    using decoder: JSONDecoder
+) async throws -> T {
     if data.isEmpty, T.self is OptionalDecoding.Type {
         return Optional<Decodable>.none as! T
     } else if T.self == Data.self {

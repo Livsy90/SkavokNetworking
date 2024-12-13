@@ -1,7 +1,7 @@
 import Foundation
 
 /// Performs network requests constructed using ``Request``.
-public actor APIClient: ApiClientProtocol {
+public actor APIClient {
     /// The configuration with which the client was initialized with.
     public nonisolated let configuration: Configuration
     /// The underlying `URLSession` instance.
@@ -9,7 +9,7 @@ public actor APIClient: ApiClientProtocol {
 
     private let decoder: JSONDecoder
     private let encoder: JSONEncoder
-    private let delegate: APIClientDelegate
+    private  let delegate: APIClientDelegate
     private let dataLoader = DataLoader()
 
     /// The configuration for ``APIClient``.
@@ -79,10 +79,10 @@ public actor APIClient: ApiClientProtocol {
     ///
     /// - returns: A response with a decoded body. If the response type is
     /// optional and the response body is empty, returns `nil`.
-    @discardableResult public func send<T: Decodable>(
+    @discardableResult public func send<T: Decodable & Sendable>(
         _ request: Request<T>,
         delegate: URLSessionDataDelegate? = nil,
-        configure: ((inout URLRequest) throws -> Void)? = nil
+        configure: sending ((inout URLRequest) throws -> Void)? = nil
     ) async throws -> Response<T> {
         let response = try await data(for: request, delegate: delegate, configure: configure)
         let decoder = self.delegate.client(self, decoderForRequest: request) ?? self.decoder
@@ -101,7 +101,7 @@ public actor APIClient: ApiClientProtocol {
     @discardableResult public func send(
         _ request: Request<Void>,
         delegate: URLSessionDataDelegate? = nil,
-        configure: ((inout URLRequest) throws -> Void)? = nil
+        configure: sending ((inout URLRequest) throws -> Void)? = nil
     ) async throws -> Response<Void> {
         try await data(for: request, delegate: delegate, configure: configure).map { _ in () }
     }
@@ -118,7 +118,7 @@ public actor APIClient: ApiClientProtocol {
     public func data<T>(
         for request: Request<T>,
         delegate: URLSessionDataDelegate? = nil,
-        configure: ((inout URLRequest) throws -> Void)? = nil
+        configure: sending ((inout URLRequest) throws -> Void)? = nil
     ) async throws -> Response<Data> {
         let request = try await makeURLRequest(for: request, configure)
         return try await performRequest {
@@ -146,11 +146,11 @@ public actor APIClient: ApiClientProtocol {
     ///
     /// - returns: A response with a decoded body. If the response type is
     /// optional and the response body is empty, returns `nil`.
-    @discardableResult public func upload<T: Decodable>(
+    @discardableResult public func upload<T: Decodable & Sendable>(
         for request: Request<T>,
         fromFile fileURL: URL,
         delegate: URLSessionTaskDelegate? = nil,
-        configure: ((inout URLRequest) throws -> Void)? = nil
+        configure: sending ((inout URLRequest) throws -> Void)? = nil
     ) async throws -> Response<T> {
         let response = try await _upload(for: request, fromFile: fileURL, delegate: delegate, configure: configure)
         let decoder = self.delegate.client(self, decoderForRequest: request) ?? self.decoder
@@ -171,7 +171,7 @@ public actor APIClient: ApiClientProtocol {
         for request: Request<Void>,
         fromFile fileURL: URL,
         delegate: URLSessionTaskDelegate? = nil,
-        configure: ((inout URLRequest) throws -> Void)? = nil
+        configure: sending ((inout URLRequest) throws -> Void)? = nil
     ) async throws -> Response<Void> {
         try await _upload(for: request, fromFile: fileURL, delegate: delegate, configure: configure).map { _ in () }
     }
@@ -208,11 +208,11 @@ public actor APIClient: ApiClientProtocol {
     ///
     /// - returns: A response with a decoded body. If the response type is
     /// optional and the response body is empty, returns `nil`.
-    @discardableResult public func upload<T: Decodable>(
+    @discardableResult public func upload<T: Decodable & Sendable>(
         for request: Request<T>,
         from data: Data,
         delegate: URLSessionTaskDelegate? = nil,
-        configure: ((inout URLRequest) throws -> Void)? = nil
+        configure: sending ((inout URLRequest) throws -> Void)? = nil
     ) async throws -> Response<T> {
         let response = try await _upload(for: request, from: data, delegate: delegate, configure: configure)
         let decoder = self.delegate.client(self, decoderForRequest: request) ?? self.decoder
@@ -233,7 +233,7 @@ public actor APIClient: ApiClientProtocol {
         for request: Request<Void>,
         from data: Data,
         delegate: URLSessionTaskDelegate? = nil,
-        configure: ((inout URLRequest) throws -> Void)? = nil
+        configure: sending ((inout URLRequest) throws -> Void)? = nil
     ) async throws -> Response<Void> {
         try await _upload(for: request, from: data, delegate: delegate, configure: configure).map { _ in () }
     }
@@ -242,7 +242,7 @@ public actor APIClient: ApiClientProtocol {
         for request: Request<T>,
         from data: Data,
         delegate: URLSessionTaskDelegate?,
-        configure: ((inout URLRequest) throws -> Void)?
+        configure: sending ((inout URLRequest) throws -> Void)?
     ) async throws -> Response<Data> {
         let request = try await makeURLRequest(for: request, configure)
         return try await performRequest {
@@ -314,7 +314,10 @@ public actor APIClient: ApiClientProtocol {
     }
 
     // MARK: Helpers
-    private func performRequest<T>(attempts: Int = 1, send: () async throws -> T) async throws -> T {
+    private func performRequest<T: Sendable>(
+        attempts: Int = 1,
+        send: () async throws -> T
+    ) async throws -> T {
         do {
             return try await send()
         } catch {

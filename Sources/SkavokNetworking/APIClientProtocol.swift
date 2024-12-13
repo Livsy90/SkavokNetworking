@@ -1,22 +1,22 @@
 import Foundation
 
 public protocol ApiClientProtocol: AnyObject {
-    func send<T: Decodable>(
+    func send<T: Decodable & Sendable>(
         _ request: Request<T>,
         delegate: URLSessionDataDelegate?,
-        configure: ((inout URLRequest) throws -> Void)?
+        configure: sending ((inout URLRequest) throws -> Void)?
     ) async throws -> Response<T>
     
     func send(
         _ request: Request<Void>,
         delegate: URLSessionDataDelegate?,
-        configure: ((inout URLRequest) throws -> Void)?
+        configure: sending ((inout URLRequest) throws -> Void)?
     ) async throws -> Response<Void>
     
     func data<T>(
         for request: Request<T>,
         delegate: URLSessionDataDelegate?,
-        configure: ((inout URLRequest) throws -> Void)?
+        configure: sending ((inout URLRequest) throws -> Void)?
     ) async throws -> Response<Data>
     
     // MARK: Upload
@@ -30,11 +30,11 @@ public protocol ApiClientProtocol: AnyObject {
     ///
     /// - returns: A response with a decoded body. If the response type is
     /// optional and the response body is empty, returns `nil`.
-    func upload<T: Decodable>(
+    func upload<T: Decodable & Sendable>(
         for request: Request<T>,
         fromFile fileURL: URL,
         delegate: URLSessionTaskDelegate?,
-        configure: ((inout URLRequest) throws -> Void)?
+        configure: sending ((inout URLRequest) throws -> Void)?
     ) async throws -> Response<T>
 
     /// Convenience method to upload data from a file.
@@ -45,12 +45,12 @@ public protocol ApiClientProtocol: AnyObject {
     ///   - delegate: A task-specific delegate.
     ///   - configure: Modifies the underlying `URLRequest` before sending it.
     ///
-    /// - returns: Empry response.
+    /// - returns: Empty response.
     func upload(
         for request: Request<Void>,
         fromFile fileURL: URL,
         delegate: URLSessionTaskDelegate?,
-        configure: ((inout URLRequest) throws -> Void)?
+        configure: sending ((inout URLRequest) throws -> Void)?
     ) async throws -> Response<Void>
 
     // MARK: Upload Data
@@ -64,11 +64,11 @@ public protocol ApiClientProtocol: AnyObject {
     ///
     /// - returns: A response with a decoded body. If the response type is
     /// optional and the response body is empty, returns `nil`.
-    func upload<T: Decodable>(
+    func upload<T: Decodable & Sendable>(
         for request: Request<T>,
         from data: Data,
         delegate: URLSessionTaskDelegate?,
-        configure: ((inout URLRequest) throws -> Void)?
+        configure: sending ((inout URLRequest) throws -> Void)?
     ) async throws -> Response<T>
 
     /// Convenience method for uploading data.
@@ -84,7 +84,7 @@ public protocol ApiClientProtocol: AnyObject {
         for request: Request<Void>,
         from data: Data,
         delegate: URLSessionTaskDelegate?,
-        configure: ((inout URLRequest) throws -> Void)?
+        configure: sending ((inout URLRequest) throws -> Void)?
     ) async throws -> Response<Void>
 
     // MARK: Making Requests
@@ -93,7 +93,7 @@ public protocol ApiClientProtocol: AnyObject {
 }
 
 public extension ApiClientProtocol {
-    func send<T: Decodable>(_ request: Request<T>) async throws -> Response<T> {
+    func send<T: Decodable & Sendable>(_ request: Request<T>) async throws -> Response<T> {
         try await send(request, delegate: nil, configure: nil)
     }
     
