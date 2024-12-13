@@ -1,7 +1,7 @@
 import Foundation
 
 /// Performs network requests constructed using ``Request``.
-public actor APIClient {
+public actor APIClient: ApiClientProtocol {
     /// The configuration with which the client was initialized with.
     public nonisolated let configuration: Configuration
     /// The underlying `URLSession` instance.
@@ -166,7 +166,7 @@ public actor APIClient {
     ///   - delegate: A task-specific delegate.
     ///   - configure: Modifies the underlying `URLRequest` before sending it.
     ///
-    /// - returns: Empry response.
+    /// - returns: Empty response.
     @discardableResult public func upload(
         for request: Request<Void>,
         fromFile fileURL: URL,

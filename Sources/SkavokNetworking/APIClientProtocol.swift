@@ -1,6 +1,6 @@
 import Foundation
 
-public protocol ApiClientProtocol: AnyObject {
+public protocol ApiClientProtocol: Actor {
     func send<T: Decodable & Sendable>(
         _ request: Request<T>,
         delegate: URLSessionDataDelegate?,
