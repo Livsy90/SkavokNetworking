@@ -90,6 +90,9 @@ public protocol ApiClientProtocol: Actor {
     // MARK: Making Requests
     /// Creates `URLRequest` for the given request.
     func makeURLRequest<T>(for request: Request<T>) async throws -> URLRequest
+    
+    /// Clears URL Cache.
+    func clearCache()
 }
 
 public extension ApiClientProtocol {

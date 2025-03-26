@@ -264,6 +264,11 @@ public actor APIClient: ApiClientProtocol {
     public func makeURLRequest<T>(for request: Request<T>) async throws -> URLRequest {
         try await makeURLRequest(for: request, { _ in })
     }
+    
+    /// Clears URL Cache.
+    public func clearCache() {
+        URLCache.shared.removeAllCachedResponses()
+    }
 
     private func makeURLRequest<T>(
         for request: Request<T>,
