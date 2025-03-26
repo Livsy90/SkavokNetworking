@@ -16,6 +16,8 @@ public struct Request<Response>: @unchecked Sendable {
     public var headers: [String: String]?
     /// ID provided by the user. Not used by the API client.
     public var id: String?
+    /// The constants used to specify interaction with the cached responses.
+    public var cachePolicy: NSURLRequest.CachePolicy = .returnCacheDataElseLoad
 
     /// Initializes the request with the given parameters.
     public init(
@@ -24,7 +26,8 @@ public struct Request<Response>: @unchecked Sendable {
         query: [(String, String?)]? = nil,
         body: EncodableModel? = nil,
         headers: [String: String]? = nil,
-        id: String? = nil
+        id: String? = nil,
+        cachePolicy: NSURLRequest.CachePolicy = .returnCacheDataElseLoad
     ) {
         self.method = method
         self.url = url
@@ -32,6 +35,7 @@ public struct Request<Response>: @unchecked Sendable {
         self.headers = headers
         self.body = body
         self.id = id
+        self.cachePolicy = cachePolicy
     }
 
     /// Initializes the request with the given parameters.
@@ -41,7 +45,8 @@ public struct Request<Response>: @unchecked Sendable {
         query: [(String, String?)]? = nil,
         body: EncodableModel? = nil,
         headers: [String: String]? = nil,
-        id: String? = nil
+        id: String? = nil,
+        cachePolicy: NSURLRequest.CachePolicy = .returnCacheDataElseLoad
     ) {
         self.method = method
         self.url = URL(string: path.isEmpty ? "/" : path)
@@ -49,6 +54,7 @@ public struct Request<Response>: @unchecked Sendable {
         self.headers = headers
         self.body = body
         self.id = id
+        self.cachePolicy = cachePolicy
     }
 
     private init(optionalUrl: URL?, method: HTTPMethod) {
@@ -63,19 +69,21 @@ public struct Request<Response>: @unchecked Sendable {
         copy.body = body
         copy.headers = headers
         copy.id = id
+        copy.cachePolicy = cachePolicy
         return copy
     }
 }
 
 extension Request where Response == Void {
-    /// Initialiazes the request with the given parameters.
+    /// Initializes the request with the given parameters.
     public init(
         url: URL,
         method: HTTPMethod = .get,
         query: [(String, String?)]? = nil,
         body: EncodableModel? = nil,
         headers: [String: String]? = nil,
-        id: String? = nil
+        id: String? = nil,
+        cachePolicy: NSURLRequest.CachePolicy = .returnCacheDataElseLoad
     ) {
         self.method = method
         self.url = url
@@ -83,16 +91,18 @@ extension Request where Response == Void {
         self.headers = headers
         self.body = body
         self.id = id
+        self.cachePolicy = cachePolicy
     }
 
-    /// Initialiazes the request with the given parameters.
+    /// Initializes the request with the given parameters.
     public init(
         path: String,
         method: HTTPMethod = .get,
         query: [(String, String?)]? = nil,
         body: EncodableModel? = nil,
         headers: [String: String]? = nil,
-        id: String? = nil
+        id: String? = nil,
+        cachePolicy: NSURLRequest.CachePolicy = .returnCacheDataElseLoad
     ) {
         self.method = method
         self.url = URL(string: path.isEmpty ? "/" : path)
@@ -100,6 +110,7 @@ extension Request where Response == Void {
         self.headers = headers
         self.body = body
         self.id = id
+        self.cachePolicy = cachePolicy
     }
 }
 

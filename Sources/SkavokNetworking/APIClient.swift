@@ -273,6 +273,7 @@ public actor APIClient: ApiClientProtocol {
         var urlRequest = URLRequest(url: url)
         urlRequest.allHTTPHeaderFields = request.headers
         urlRequest.httpMethod = request.method.rawValue
+        urlRequest.cachePolicy = request.cachePolicy
         if let body = request.body {
             let encoder = delegate.client(self, encoderForRequest: request) ?? self.encoder
             urlRequest.httpBody = try await encode(body, using: encoder)
