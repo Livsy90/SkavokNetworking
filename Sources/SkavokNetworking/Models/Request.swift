@@ -17,7 +17,7 @@ public struct Request<Response>: @unchecked Sendable {
     /// ID provided by the user. Not used by the API client.
     public var id: String?
     /// The constants used to specify interaction with the cached responses.
-    public var cachePolicy: NSURLRequest.CachePolicy = .returnCacheDataElseLoad
+    public var cachePolicy: NSURLRequest.CachePolicy = .useProtocolCachePolicy
 
     /// Initializes the request with the given parameters.
     public init(
@@ -27,7 +27,7 @@ public struct Request<Response>: @unchecked Sendable {
         body: EncodableModel? = nil,
         headers: [String: String]? = nil,
         id: String? = nil,
-        cachePolicy: NSURLRequest.CachePolicy = .returnCacheDataElseLoad
+        cachePolicy: NSURLRequest.CachePolicy = .useProtocolCachePolicy
     ) {
         self.method = method
         self.url = url
@@ -46,7 +46,7 @@ public struct Request<Response>: @unchecked Sendable {
         body: EncodableModel? = nil,
         headers: [String: String]? = nil,
         id: String? = nil,
-        cachePolicy: NSURLRequest.CachePolicy = .returnCacheDataElseLoad
+        cachePolicy: NSURLRequest.CachePolicy = .useProtocolCachePolicy
     ) {
         self.method = method
         self.url = URL(string: path.isEmpty ? "/" : path)
@@ -83,7 +83,7 @@ extension Request where Response == Void {
         body: EncodableModel? = nil,
         headers: [String: String]? = nil,
         id: String? = nil,
-        cachePolicy: NSURLRequest.CachePolicy = .returnCacheDataElseLoad
+        cachePolicy: NSURLRequest.CachePolicy = .useProtocolCachePolicy
     ) {
         self.method = method
         self.url = url
@@ -102,7 +102,7 @@ extension Request where Response == Void {
         body: EncodableModel? = nil,
         headers: [String: String]? = nil,
         id: String? = nil,
-        cachePolicy: NSURLRequest.CachePolicy = .returnCacheDataElseLoad
+        cachePolicy: NSURLRequest.CachePolicy = .useProtocolCachePolicy
     ) {
         self.method = method
         self.url = URL(string: path.isEmpty ? "/" : path)
